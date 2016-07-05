@@ -25,4 +25,4 @@ end
 print("Starting up sensor")
 watch.ground(GROUND_PIN)
 watch.watchpin(INPUT_PIN, onchange)
-telemetry.init(BROKER_HOSTNAME, gpio.read(INPUT_PIN))
+telemetry.init(BROKER_HOSTNAME)
