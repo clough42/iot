@@ -6,8 +6,8 @@ local telemetry = {}
 
 local SENSORID = node.chipid()
 local CLIENTID = "sensor-"..SENSORID
-local TOPIC_STATUS = "/sensor/"..SENSORID.."/status"
-local TOPIC_VALUE = "/sensor/"..SENSORID.."/value"
+local TOPIC_STATUS = "sensor/"..SENSORID.."/status"
+local TOPIC_VALUE = "sensor/"..SENSORID.."/value"
 local STATUS_UP = "up"
 local STATUS_DOWN = "down"
 local KEEPALIVE = 60
