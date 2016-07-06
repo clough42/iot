@@ -13,7 +13,9 @@ local STATUS_DOWN = "down"
 local KEEPALIVE = 60
 
 -- mqtt client object
+local broker = nil
 local client = nil
+local initialvalue = nil
 
 
 -- error handling
@@ -21,7 +23,11 @@ local function success(client)
     print("MQTT Success")
 end
 local function error(client, message)
-    print("MQTT Failure: " .. message)
+    print("MQTT Failure")
+    print("Restarting in 30 seconds...")
+    tmr.alarm(0,30000,tmr.ALARM_SINGLE, function()
+        node.restart()
+    end)
 end
 
 
@@ -29,7 +35,7 @@ end
 local function statuspayload(status_value)
     local payload = {
         status = status_value,
-        chipid = CHIPID,
+        chipid = SENSORID,
         ip = wifi.sta.getip(),
         mac = wifi.sta.getmac(),
         hostname = wifi.sta.gethostname()
@@ -42,8 +48,7 @@ local function mqttconnected(c)
     print("MQTT connected")
     -- status up message
     client:publish(TOPIC_STATUS, statuspayload(STATUS_UP), 0, 1, success, error)
-    -- status down message as lwt
-    client:lwt(TOPIC_STATUS, statuspayload(STATUS_DOWN), 0, 1)
+    telemetry.publishvalue(initialvalue)
 end
 
 
@@ -53,15 +58,18 @@ function telemetry.publishvalue(val)
     payload = {
         value = val
     }
-    client:publish(topic(VALUE), cjson.encode(payload), 0, 1, success, error)
+    client:publish(TOPIC_VALUE, cjson.encode(payload), 0, 1, success, error)
 end
 
 -- Initialize telemetry (including lwt)
-function telemetry.init(broker)
-    currentvalue = initialval
+function telemetry.init(broker, initialval)
+    initialvalue = initialval
     client = mqtt.Client(CLIENTID, KEEPALIVE, nil, nil)
     client:on("connect", mqttconnected)
-    client:connect(broker, 1883, 0)
+    client:on("offline", error)
+    -- status down message as lwt
+    client:lwt(TOPIC_STATUS, statuspayload(STATUS_DOWN), 0, 1)
+    client:connect(broker, 1883, 0, nil, error)
 end
 
 

@@ -6,7 +6,7 @@ function watcher.watchpin(pin, changefunc)
     local DEBOUNCE_TIME = 500
     
     function debounce(pin, time, func)
-        local laststate = gpio.read(pin)
+        local laststate = nil
         return function (...)
             tmr.unregister(TIMER_NO);
             tmr.alarm(TIMER_NO, 500, tmr.ALARM_SINGLE, function()
@@ -20,6 +20,7 @@ function watcher.watchpin(pin, changefunc)
     end
     
     gpio.mode(pin, gpio.INT, gpio.PULLUP)
+
     gpio.trig(pin, "both", debounce(pin, DEBOUNCE_TIME, changefunc))
 end
 
