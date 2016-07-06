@@ -1,34 +1,53 @@
-local watcher = {}
+-- GPIO Pin Watcher
+--
+-- Create a new object to watch a GPIO input pin.  You can read the value
+-- explicitly and you can register a callback to be notified when it changes.
 
--- Watch the state of a pin, and fire changefunc(level) when it changes
-function watcher.watchpin(pin, changefunc)
-    local TIMER_NO = 3
-    local DEBOUNCE_TIME = 500
-    
-    function debounce(pin, time, func)
-        local laststate = nil
-        return function (...)
-            tmr.unregister(TIMER_NO);
-            tmr.alarm(TIMER_NO, 500, tmr.ALARM_SINGLE, function()
-                local current = gpio.read(pin)
-                if current ~= lastState then
-                    func(current)
-                    lastState = current
-                 end 
-            end)
-        end
-    end
-    
+Watcher = {}
+Watcher.__index = Watcher
+
+setmetatable(Watcher, {
+    __call = function (cls, ...)
+        return cls.create(...)
+    end,
+})
+
+
+-- Construct a new Watcher instance
+function Watcher.create(pin)
+    local new = setmetatable({}, Watcher)
+    new.laststate = -1;
+    new.timer = 3
+    new.debouncetime = 500
+    new.callback = nil
+    new.pin = pin;
     gpio.mode(pin, gpio.INT, gpio.PULLUP)
-
-    gpio.trig(pin, "both", debounce(pin, DEBOUNCE_TIME, changefunc))
+    return new
 end
 
--- Use a GPIO pin as a ground for a switch
--- ESP-01 workaround, to make sure the sense pin is never grounded on boot
-function watcher.ground(pin)
-    gpio.mode(pin, gpio.OUTPUT)
-    gpio.write(pin, gpio.LOW)
+local function debounce(self)
+    return function(val) 
+        tmr.unregister(self.timer)
+        tmr.alarm(self.timer, self.debouncetime, tmr.ALARM_SINGLE, function()
+            local current = gpio.read(self.pin)
+            if current ~= self.laststate then
+                self.callback(current)
+                self.laststate = current
+            end
+        end)
+    end
 end
 
-return watcher
+-- Watch for pin state changes
+function Watcher:watch(callback)
+    self.callback = callback
+    gpio.trig(self.pin, "both", debounce(self));
+end
+
+-- Read the current stat of the pin
+function Watcher:read()
+    return gpio.read(self.pin)
+end
+
+
+return Watcher

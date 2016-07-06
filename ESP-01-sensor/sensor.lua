@@ -7,7 +7,7 @@
 -- This code starts the enduser_setup module, and after it gets an IP address, it connects to
 -- the MQTT broker and starts up the handlers to watch the input pins.
 
-local watch = require("watcher")
+require("watcher")
 local telemetry = require("telemetry")
 
 
@@ -15,15 +15,14 @@ local INPUT_PIN = 4
 local GROUND_PIN = 3
 local BROKER_HOSTNAME = "mqtt"
 
-
-function onchange(level)
-    print("Switch changed: " .. level)
-    telemetry.publishvalue(level)
-end
-
-
 print("Starting up sensor")
-watch.ground(GROUND_PIN)
-watch.watchpin(INPUT_PIN, onchange)
-telemetry.init(BROKER_HOSTNAME, gpio.read(INPUT_PIN))
+gpio.mode(GROUND_PIN, gpio.OUTPUT)
+gpio.write(GROUND_PIN, gpio.LOW)
 
+
+local w = Watcher(INPUT_PIN)
+telemetry.init(BROKER_HOSTNAME, w:read())
+w:watch(function(val)
+    print("Switch changed: " .. val)
+    telemetry.publishvalue(level)
+end)
