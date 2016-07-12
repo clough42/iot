@@ -2,10 +2,10 @@
  * Listen to garage door and publish results to Pushover
  */
 
-const mqtt = require("mqtt")
-const request = require("request")
+const mqtt = require("mqtt");
+const request = require("request");
 
-const client = mqtt.connect("mqtt://mqtt.clough.local")
+const client = mqtt.connect("mqtt://mqtt.clough.local");
 
 function pushover(message) {
     request.post(
@@ -25,14 +25,14 @@ function pushover(message) {
 
 client.on('connect', function() {
     client.subscribe('sensor/10488302/value')
-})
+});
 
 client.on('message', function(topic, message) {
     try {
-        jsmessage = JSON.parse(message.toString())
-        console.log("Message received: " + jsmessage.value)
+        jsmessage = JSON.parse(message.toString());
+        console.log("Message received: " + jsmessage.value);
 
-        var doorState = "open"
+        var doorState = "open";
         if (jsmessage.value == 0) {
             doorState = "closed"
         }
@@ -41,5 +41,5 @@ client.on('message', function(topic, message) {
     catch(error) {
         console.log("Error: " + error.stack)
     }
-})
+});
 
