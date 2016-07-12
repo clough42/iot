@@ -1,0 +1,5 @@
+rb:  
+  image: mqtt-pushover
+  environment:
+    PUSHOVER_TOKEN: 'PUSHOVER_API_TOKEN_HERE'
+    PUSHOVER_USER: 'PUSHOVER_USER_TOKEN_HERE'
