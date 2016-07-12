@@ -1,0 +1,4 @@
+rb:  
+  image: mqtt-pushover
+  environment:
+    IFTT_MAKER_TOKEN: 'c4k_uivHyMqvlSygSEhd0h'
