@@ -1,11 +1,11 @@
 {
-  "name": "garage-door-pushover",
+  "name": "mqtt-sensor-ifttt",
   "version": "0.9.9",
   "dependencies": {
     "mqtt": "*",
     "request": "*"
   },
   "scripts": {
-    "start" : "node ./pushover.js"
+    "start" : "node ./ifttt.js"
   }
 }

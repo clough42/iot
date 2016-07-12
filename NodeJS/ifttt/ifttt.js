@@ -5,20 +5,19 @@
 const mqtt = require("mqtt")
 const request = require("request")
 
-const client = mqtt.connect("mqtt://mqtt.clough.local")
+console.log("Broker: " + process.env.MQTT_BROKER)
+const client = mqtt.connect(process.env.MQTT_BROKER)
 
-function iftt(value) {
+console.log("Token: " + process.env.IFTTT_MAKER_TOKEN)
+
+function ifttt(sensorid, value) {
     request.post(
-        'https://maker.ifttt.com/trigger/{event}/with/key/',
+        'https://maker.ifttt.com/trigger/' + sensorid + '/with/key/' + process.env.IFTTT_MAKER_TOKEN,
         { form: {
-            token: process.env.PUSHOVER_TOKEN,
-            user: process.env.PUSHOVER_USER,
-            message: message
+                value1: value
         } },
         function (error, response, body) {
-            if (!error && response.statusCode == 200) {
-                console.log(body)
-            }
+            console.log("Body: " + body)
         }
     );
 }
@@ -28,9 +27,10 @@ client.on('connect', function() {
 })
 
 client.on('message', function(topic, message) {
-    console.log("Topic: " + topic)
+    var sensorid = topic.split("/")[1]
     jsmessage = JSON.parse(message.toString())
-    console.log("Value: " + jsmessage.value)
-
+    var value = jsmessage.value
+    console.log("Message: sensor=" + sensorid + ", value=" + value)
+    ifttt(sensorid, value)
 })
 

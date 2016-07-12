@@ -1,4 +1,5 @@
 rb:  
-  image: mqtt-pushover
+  image: mqtt-ifttt
   environment:
-    IFTT_MAKER_TOKEN: 'c4k_uivHyMqvlSygSEhd0h'
+    MQTT_BROKER: 'mqtt://mqtt.clough.local'
+    IFTTT_MAKER_TOKEN: 'MAKER_TOKEN_GOES_HERE'
