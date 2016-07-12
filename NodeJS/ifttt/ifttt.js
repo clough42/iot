@@ -1,5 +1,5 @@
 /**
- * Listen to garage door and publish results to Pushover
+ * Listen to all sensor messages and publish them to IFTTT
  */
 
 const mqtt = require("mqtt");
