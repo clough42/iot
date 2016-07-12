@@ -28,13 +28,18 @@ client.on('connect', function() {
 })
 
 client.on('message', function(topic, message) {
-    jsmessage = JSON.parse(message.toString())
-    console.log("Message received: " + jsmessage.value)
+    try {
+        jsmessage = JSON.parse(message.toString())
+        console.log("Message received: " + jsmessage.value)
 
-    var doorState = "open"
-    if( jsmessage.value == 0 ) {
-        doorState = "closed"
+        var doorState = "open"
+        if (jsmessage.value == 0) {
+            doorState = "closed"
+        }
+        pushover("The garage door is " + doorState + ".")
     }
-    pushover("The garage door is " + doorState + ".")
+    catch(error) {
+        console.log("Error: " + error.stack)
+    }
 })
 
