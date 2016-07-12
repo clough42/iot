@@ -1,0 +1,11 @@
+{
+  "name": "garage-door-pushover",
+  "version": "0.9.9",
+  "dependencies": {
+    "mqtt": "*",
+    "request": "*"
+  },
+  "scripts": {
+    "start" : "node ./pushover.js"
+  }
+}
