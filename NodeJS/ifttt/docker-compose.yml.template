@@ -1,5 +1,5 @@
 rb:  
-  image: mqtt-ifttt
+  image: mqtt-sensor-ifttt
   environment:
     MQTT_BROKER: 'mqtt://mqtt.clough.local'
     IFTTT_MAKER_TOKEN: 'MAKER_TOKEN_GOES_HERE'
