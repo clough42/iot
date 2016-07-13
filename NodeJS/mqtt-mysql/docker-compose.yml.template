@@ -1,0 +1,9 @@
+rb:  
+  image: mqtt-mysql
+  environment:
+    MQTT_BROKER: 'mqtt://mqtt.clough.local'
+    MYSQL_HOST: 'merovingian.clough.local'
+    MYSQL_USER: 'mqtt-mysql'
+    MYSQL_PASSWORD: 'password'
+    MYSQL_DATABASE: 'sensor_data'
+

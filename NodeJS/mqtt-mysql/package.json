@@ -1,0 +1,11 @@
+{
+  "name": "mqtt-mysql",
+  "version": "0.9.9",
+  "dependencies": {
+    "mqtt": "*",
+    "mysql": "*"
+  },
+  "scripts": {
+    "start" : "node ./mqtt-mysql.js"
+  }
+}
