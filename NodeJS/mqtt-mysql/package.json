@@ -3,7 +3,8 @@
   "version": "0.9.9",
   "dependencies": {
     "mqtt": "*",
-    "mysql": "*"
+    "mysql": "*",
+    "bluebird": "*"
   },
   "scripts": {
     "start" : "node ./mqtt-mysql.js"
