@@ -4,11 +4,12 @@
 
 const Promise = require("bluebird");
 const mqtt = require("mqtt");
-const mysql = require("mysql");
+const mysql = require("promise-mysql");
 
+var dbConnection;
 
 function updatesensor(sensorid, message) {
-    dbQuery(
+    dbConnection.query(
         'INSERT INTO sensor (chipid, mac, hostname, ip, status) ' +
         'VALUES (?, ?, ?, ?, ?) ' +
         'ON DUPLICATE KEY UPDATE mac = VALUES(mac), hostname = VALUES(hostname), ip = VALUES(ip), status = VALUES(status)',
@@ -16,18 +17,18 @@ function updatesensor(sensorid, message) {
     ).then(function(results, fields) {
         console.log("Saved status for sensor " + sensorid + ": " + message.status);
     }).catch(function(e) {
-        console.log("Database error: " + e.stack);
+        console.log("Database error: ", e);
     });
 }
 
 function storesensorvalue(sensorid, message) {
-    dbQuery(
+    dbConnection.query(
         'INSERT INTO sensorvalue (chipid, value) VALUES (?, ?)',
         [sensorid, message.value]
     ).then(function(results, fields) {
         console.log("Saved value for sensor " + sensorid + ": " + message.value);
     }).catch(function(e) {
-        console.log("Database error: " + e.stack);
+        console.log("Database error: ", e);
     });
 }
 
@@ -50,27 +51,25 @@ function handleMessage(topic, message) {
         }
     }
     catch (e) {
-        console.log("Caught error handling message: " + e.stack);
+        console.log("Caught error handling message: ", e);
     }
 }
 
 
-var dbConnection = mysql.createConnection({
+mysql.createConnection({
     host: process.env.MYSQL_HOST,
     user: process.env.MYSQL_USER,
     password: process.env.MYSQL_PASSWORD,
     database: process.env.MYSQL_DATABASE
-});
-var dbConnect = Promise.promisify(dbConnection.connect, {context: dbConnection});
-var dbQuery = Promise.promisify(dbConnection.query, {context: dbConnection});
-
-dbConnect().then(function(result) {
+}).then(function(conn) {
+    dbConnection = conn;
+}).then(function() {
     mqtt.connect(process.env.MQTT_BROKER)
         .subscribe('sensor/+/value')
         .subscribe('sensor/+/status')
         .on('message', handleMessage);
 }).catch(function(e) {
-    console.log("Error connecting to database: " + e.stack);
+    console.log("Error connecting to database: ", e);
 });
 
 

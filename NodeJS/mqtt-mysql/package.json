@@ -3,7 +3,7 @@
   "version": "0.9.9",
   "dependencies": {
     "mqtt": "*",
-    "mysql": "*",
+    "promise-mysql": "*",
     "bluebird": "*"
   },
   "scripts": {
