@@ -33,7 +33,7 @@ function updateSensor(sensorid, message) {
 }
 
 
-function storeSensorvalue(sensorid, message) {
+function storeSensorValue(sensorid, message) {
     dbPool
         .query(
             'INSERT INTO sensorvalue (chipid, value) VALUES (?, ?)',
@@ -58,7 +58,7 @@ function handleMessage(topic, message) {
         switch (messageType) {
             case "value":
                 console.log("Got value for sensor " + sensorId);
-                storeSensorvalue(sensorId, parsedMessage);
+                storeSensorValue(sensorId, parsedMessage);
                 break;
             case "status":
                 console.log("Got status for sensor " + sensorId);
