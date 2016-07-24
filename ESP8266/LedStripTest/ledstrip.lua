@@ -2,9 +2,7 @@
 --
 -- LED Bar test
 
-
-
-
+local NUM_LEDS = 5;
 local i = 1;
 local d = 1;
 local hue = 0;
@@ -21,7 +19,7 @@ end
 
 
 ws2812.init()
-local buffer = ws2812.newBuffer(5,3);
+local buffer = ws2812.newBuffer(NUM_LEDS,3);
 buffer:fill(0,0,0);
 
 tmr.alarm(0, 50, 1, function()
@@ -29,9 +27,10 @@ tmr.alarm(0, 50, 1, function()
     local r,g,b = hueToRgb(hue);
 
     i = i + d;
-    if( i == 5 ) then d = -1 end
+    if( i == NUM_LEDS ) then d = -1 end
     if( i == 1 ) then d = 1 end
     buffer:fade(3);
     buffer:set(i, r,g,b);
     buffer:write();
 end)
+
