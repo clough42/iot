@@ -243,3 +243,4 @@ ModelManifest.xml
 
 # FAKE - F# Make
 .fake/
+/ESP8266/Weather-PlatformIO/lib/homie-esp8266
