@@ -1,0 +1,13 @@
+{
+  "name": "weather-sensor",
+  "version": "1.0.0",
+  "description": "NodeMCU ESP8266 DHT Weather Sensor",
+  "scripts": {
+    "init": "nodemcu-tool devices --all & nodemcu-tool init",
+    "format": "nodemcu-tool mkfs --noninteractive",
+    "list": "nodemcu-tool fsinfo",
+    "install": "nodemcu-tool upload main.lua ../common/ledstrip.lua ../common/telemetry.lua ../common/watcher.lua --keeppath --compile",
+    "run": "nodemcu-tool run main.lc"
+  },
+  "author": "clough42"
+}

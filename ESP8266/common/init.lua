@@ -2,7 +2,7 @@
 
 local ledstrip = require("ledstrip");
 
-START_FILE = "led.lua"
+START_FILE = "main.lua"
 
 
 -- Give the user one last opportunity to avoid starting the sensor by removing init.lua
