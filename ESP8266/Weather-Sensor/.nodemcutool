@@ -1,0 +1,6 @@
+{
+    "baudrate": "115200",
+    "port": "COM12",
+    "optimize": false,
+    "compile": false
+}
