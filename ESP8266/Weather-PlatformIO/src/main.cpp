@@ -1,6 +1,10 @@
 /**
- * 
+ * Solar-powered weather sensor
+ *
+ * Uses Homie-ESP8266 framework to connect to the network and MQTT, read a
+ * DHT sensor, report data and then deep sleep until the next reading.
  */
+
 #include "Arduino.h"
 #include <ESP8266WiFi.h>
 #include <DHT.h>
@@ -9,15 +13,19 @@
 #define VOLTAGE_PIN A0
 #define DHT_PIN D4
 #define DHT_TYPE DHT22
-#define TEMPERATURE_INTERVAL_SECONDS 10
+#define DEEP_SLEEP_SECONDS 300
 
-HomieNode temperatureNode("temperature", "temperature");
+HomieNode tempCNode("tempC", "celsius");
+HomieNode tempFNode("tempF", "fahrenheit");
 HomieNode humidityNode("humidity", "humidity");
 HomieNode batteryNode("battery", "voltage");
 
 DHT dht(DHT_PIN, DHT_TYPE);
-unsigned long lastTempTime = millis();
+bool tempReported = false;
 
+/**
+ * Report the batter voltage.
+ */
 void reportVoltage()
 {
     int voltageCount = analogRead(VOLTAGE_PIN);
@@ -25,29 +33,59 @@ void reportVoltage()
     Homie.setNodeProperty(batteryNode, "voltage", String(voltage));
 }
 
+/**
+ * Read the DHT sensor and report the data.  Keep trying on subsequent calls
+ * until we successfully report.
+ */
 void reportSensorData()
 {
-  if( millis() - lastTempTime >= TEMPERATURE_INTERVAL_SECONDS * 1000UL ) {
-    float temp = dht.readTemperature();
+  if( !tempReported ) {
+    Serial.println("Attempting to read temperature");
+
+    float tempC = dht.readTemperature();
+    float tempF = dht.readTemperature(true);
     float humidity = dht.readHumidity();
 
-    if( ! isnan(temp) && ! isnan(humidity) ) {
-      Homie.setNodeProperty(temperatureNode, "temperature", String(temp));
+    if( ! isnan(tempC) && ! isnan(tempF) && ! isnan(humidity) ) {
+      Homie.setNodeProperty(tempCNode, "tempC", String(tempC));
+      Homie.setNodeProperty(tempFNode, "tempF", String(tempF));
       Homie.setNodeProperty(humidityNode, "humidity", String(humidity));
-      lastTempTime = millis();
+      tempReported = true;
+
+      // disconnect MQTT, which will trigger deep sleep when complete
+      Serial.println("Temp reported successfully; disconnecting");
+      Homie.disconnectMqtt();
     }
   }
 }
 
+/**
+ * Called once when Homie is connected and ready.
+ */
 void setupHandler()
 {
   dht.begin();
   reportVoltage();
 }
 
+/**
+ * Looped when homie is connected and ready.
+ */
 void loopHandler()
 {
   reportSensorData();
+}
+
+/**
+ * Called when Homie transitions between states
+ */
+void eventHandler(HomieEvent event) {
+  switch(event) {
+    case HOMIE_MQTT_DISCONNECTED:
+      ESP.deepSleep(DEEP_SLEEP_SECONDS * 1000000);
+      delay(100); // allow deep sleep to occur
+      break;
+  }
 }
 
 void setup()
@@ -57,8 +95,10 @@ void setup()
   Homie_setFirmware("solar-weather", "1.0.0");
   Homie_setBrand("clough42");
 
+  Homie.disableResetTrigger();
   Homie.setSetupFunction(setupHandler);
   Homie.setLoopFunction(loopHandler);
+  Homie.onEvent(eventHandler);
   Homie.setup();
 }
 
