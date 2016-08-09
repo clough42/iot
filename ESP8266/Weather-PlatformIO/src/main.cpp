@@ -15,16 +15,14 @@
 #define DHT_TYPE DHT22
 #define DEEP_SLEEP_SECONDS 300
 
-HomieNode tempCNode("tempC", "celsius");
-HomieNode tempFNode("tempF", "fahrenheit");
-HomieNode humidityNode("humidity", "humidity");
+HomieNode dhtNode("weather", "dht");
 HomieNode batteryNode("battery", "voltage");
 
 DHT dht(DHT_PIN, DHT_TYPE);
 bool tempReported = false;
 
 /**
- * Report the batter voltage.
+ * Report the battery voltage.
  */
 void reportVoltage()
 {
@@ -47,9 +45,12 @@ void reportSensorData()
     float humidity = dht.readHumidity();
 
     if( ! isnan(tempC) && ! isnan(tempF) && ! isnan(humidity) ) {
-      Homie.setNodeProperty(tempCNode, "tempC", String(tempC));
-      Homie.setNodeProperty(tempFNode, "tempF", String(tempF));
-      Homie.setNodeProperty(humidityNode, "humidity", String(humidity));
+      float heatIndex = dht.computeHeatIndex(tempF, humidity);
+      Homie.setNodeProperty(dhtNode, "tempC", String(tempC));
+      Homie.setNodeProperty(dhtNode, "tempF", String(tempF));
+      Homie.setNodeProperty(dhtNode, "humidity", String(humidity));
+      Homie.setNodeProperty(dhtNode, "heatIndex", String(heatIndex));
+
       tempReported = true;
 
       // disconnect MQTT, which will trigger deep sleep when complete
@@ -83,7 +84,7 @@ void eventHandler(HomieEvent event) {
   switch(event) {
     case HOMIE_MQTT_DISCONNECTED:
       ESP.deepSleep(DEEP_SLEEP_SECONDS * 1000000);
-      delay(100); // allow deep sleep to occur
+      delay(1000); // allow deep sleep to occur
       break;
   }
 }
